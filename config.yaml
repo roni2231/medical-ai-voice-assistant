@@ -1,28 +1,33 @@
-# Medical AI Voice Assistant — runtime configuration
-# Switch this file (or use a separate config.prod.yaml) between local and prod.
-# Active profile is set by the ENV environment variable (default: local).
+# Medical AI Voice Assistant -- runtime configuration
+# Switch active_profile below, or override with: ENV=prod python voice_assistant.py
+#
+# TTS backend install:
+#   local (M4/Metal):  CMAKE_ARGS="-DGGML_METAL=on" pip install orpheus-cpp llama-cpp-python --no-binary llama-cpp-python
+#   prod  (RTX/CUDA):  pip install orpheus-speech
 
 active_profile: local
 
 profiles:
   local:
-    # MacBook Air M4 — Ollama + Orpheus TTS running locally
+    # MacBook Air M4 -- orpheus-cpp (Metal/llama.cpp), Ollama LLM
     ollama:
       host: http://localhost:11434
-      model: medllama2:7b
+      model: qwen3.5:2b
     tts:
-      ws_url: ws://localhost:5005
+      backend: cpp                                          # orpheus-cpp (Metal)
+      model_name: canopylabs/orpheus-3b-0.1-finetune-prod  # vllm backend only
       voice: tara
     audio:
       output_path: /tmp/response.wav
 
   prod:
-    # NVIDIA RTX 5070 — SSH'd in, same stack, different host/model config
+    # NVIDIA RTX 5070 -- orpheus-speech (vllm/CUDA), Ollama LLM
     ollama:
       host: http://localhost:11434
       model: medllama2:7b
     tts:
-      ws_url: ws://localhost:5005
+      backend: vllm                                         # orpheus-speech (vllm)
+      model_name: canopylabs/orpheus-3b-0.1-finetune-prod
       voice: tara
     audio:
       output_path: /tmp/response.wav
